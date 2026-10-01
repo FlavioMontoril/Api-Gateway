@@ -1,0 +1,32 @@
+services:
+  api-gateway:
+    build: . # Caminho para a pasta onde está o Dockerfile do Gateway
+    container_name: api-gateway
+    ports:
+      - "8083:8083" # Expõe a porta do Gateway para o ReactJS acessar
+    environment:
+      - FRONTEND_URL=http://localhost:5173
+      - AUTH_SERVICE_URL=http://auth-service:8081
+      - TASK_SERVICE_URL=http://task-service:8082
+    depends_on:
+      - auth-service
+      - task-service
+    networks:
+      - app-network
+
+  auth-service:
+    build: ./auth-service
+    container_name: auth-service
+    # Não precisa expor 'ports' para a máquina hospedeira se apenas o Gateway for acessá-lo
+    networks:
+      - app-network
+
+  task-service:
+    build: ./task-service
+    container_name: task-service
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
